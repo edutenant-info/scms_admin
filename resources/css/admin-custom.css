@@ -4,10 +4,10 @@
     --r: 12px;
     --rs: 8px;
     --tr: .2s cubic-bezier(.4, 0, .2, 1);
-    --acc: #22C55E;
-    --acc-2: #16A34A;
-    --acc-rgb: 34 197 94;
-    --acc-contrast: #F8FFF9;
+    --acc: #3B82F6;
+    --acc-2: #2563EB;
+    --acc-rgb: 59 130 246;
+    --acc-contrast: #F8FAFF;
     --accg: rgb(var(--acc-rgb) / .26);
     --accs: rgb(var(--acc-rgb) / .14);
     --grn: #22C55E;
@@ -25,46 +25,48 @@
 :root,
 :root[data-theme-mode='dark'] {
     color-scheme: dark;
-    --bg: #0D1511;
-    --card: #15211B;
-    --side: #101A15;
-    --bdr: #23362B;
-    --bdr2: #355041;
-    --t1: #F5FBF6;
-    --t2: #C3D2C8;
-    --t3: #82988A;
+    --bg: #18181B;
+    --card: #232327;
+    --side: #1C1C1F;
+    --bdr: #2E2E33;
+    --bdr2: #3F3F46;
+    --t1: #FAFAFA;
+    --t2: #D4D4D8;
+    --t3: #A1A1AA;
     --hover-bg: rgb(255 255 255 / .05);
     --soft-bg: rgb(255 255 255 / .035);
     --table-head-bg: rgb(255 255 255 / .03);
     --row-hover: rgb(255 255 255 / .025);
-    --topbar-bg: rgb(13 21 17 / .78);
-    --modal-overlay: rgb(3 8 6 / .65);
-    --login-card-bg: rgb(21 33 27 / .88);
+    --topbar-bg: rgb(24 24 27 / .78);
+    --modal-overlay: rgb(9 9 11 / .65);
+    --login-card-bg: rgb(35 35 39 / .88);
     --panel-shadow: 0 25px 80px rgb(0 0 0 / .32);
     --card-hover-shadow: 0 10px 36px rgb(0 0 0 / .24);
-    --toast-bg: #102019
+    --toast-bg: #232327;
+    --content-bg: #1C1C1F
 }
 
 :root[data-theme-mode='light'] {
     color-scheme: light;
-    --bg: #F3F7F2;
+    --bg: #F4F4F5;
     --card: #FFFFFF;
-    --side: #ECF4EE;
-    --bdr: #D7E3DA;
-    --bdr2: #C0D1C4;
-    --t1: #162319;
-    --t2: #45584A;
-    --t3: #708374;
-    --hover-bg: rgb(15 23 42 / .05);
-    --soft-bg: rgb(15 23 42 / .035);
-    --table-head-bg: rgb(15 23 42 / .03);
-    --row-hover: rgb(15 23 42 / .025);
-    --topbar-bg: rgb(243 247 242 / .84);
-    --modal-overlay: rgb(15 23 42 / .22);
+    --side: #ECECEE;
+    --bdr: #E2E2E5;
+    --bdr2: #CACAD0;
+    --t1: #1A1A1E;
+    --t2: #52525B;
+    --t3: #71717A;
+    --hover-bg: rgb(24 24 27 / .05);
+    --soft-bg: rgb(24 24 27 / .035);
+    --table-head-bg: rgb(24 24 27 / .03);
+    --row-hover: rgb(24 24 27 / .025);
+    --topbar-bg: rgb(244 244 245 / .84);
+    --modal-overlay: rgb(24 24 27 / .22);
     --login-card-bg: rgb(255 255 255 / .94);
-    --panel-shadow: 0 25px 80px rgb(19 38 24 / .14);
-    --card-hover-shadow: 0 10px 36px rgb(19 38 24 / .12);
-    --toast-bg: #15211B
+    --panel-shadow: 0 25px 80px rgb(24 24 27 / .14);
+    --card-hover-shadow: 0 10px 36px rgb(24 24 27 / .12);
+    --toast-bg: #232327;
+    --content-bg: #FFFFFF
 }
 
 :root[data-theme-accent='white'] {
@@ -74,6 +76,15 @@
     --acc-contrast: #0F172A;
     --accg: rgb(var(--acc-rgb) / .3);
     --accs: rgb(var(--acc-rgb) / .18)
+}
+
+:root[data-theme-accent='blue'] {
+    --acc: #3B82F6;
+    --acc-2: #2563EB;
+    --acc-rgb: 59 130 246;
+    --acc-contrast: #F8FAFF;
+    --accg: rgb(var(--acc-rgb) / .26);
+    --accs: rgb(var(--acc-rgb) / .14)
 }
 
 :root[data-theme-accent='green'] {
@@ -1077,6 +1088,10 @@ input[type="radio"]:disabled {
     background: linear-gradient(135deg, #F8FAFC, #CBD5E1)
 }
 
+.theme-swatch.blue {
+    background: linear-gradient(135deg, #3B82F6, #2563EB)
+}
+
 .theme-swatch.green {
     background: linear-gradient(135deg, #22C55E, #16A34A)
 }
@@ -1164,7 +1179,8 @@ input[type="radio"]:disabled {
 /* CONTENT */
 .ct {
     flex: 1;
-    padding: 24px
+    padding: 24px;
+    background: var(--content-bg)
 }
 
 .ph {
