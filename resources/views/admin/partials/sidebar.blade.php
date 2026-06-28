@@ -10,6 +10,17 @@
                     class="fa-solid fa-gauge-high nic"></i> Dashboard</a>
         </div>
         <div class="ns">
+            <div class="nst">Modules</div>
+            <a href="{{ route('admin.organisations.index') }}"
+               class="ni {{ request()->routeIs('admin.organisations.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-buildings nic"></i> Organisations
+            </a>
+            <a href="{{ route('admin.institutions.index') }}"
+               class="ni {{ request()->routeIs('admin.institutions.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-school nic"></i> Institutions
+            </a>
+        </div>
+        <div class="ns">
             <div class="nst">System</div>
             <form method="POST" action="{{ route('admin.logout') }}" id="logout-form">
                 @csrf

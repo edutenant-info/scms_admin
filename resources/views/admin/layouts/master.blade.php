@@ -55,6 +55,7 @@
     </div>
 
     @yield('scripts')
+    @stack('scripts')
 
     <script>
     // Global Select2 initializer

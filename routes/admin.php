@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\Auth\AdminAuthController;
+use App\Http\Controllers\Admin\Modules\Institution\InstitutionController;
+use App\Http\Controllers\Admin\Modules\Organisation\OrganisationController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 // Guest routes (not authenticated as admin).
 Route::middleware('guest:admin')->group(function () {
-    Route::get('/', [AdminAuthController::class, 'showLogin'])->name('login');
+    Route::get('/', [AdminAuthController::class, 'showLogin'])->name('home');
     Route::get('login', [AdminAuthController::class, 'showLogin'])->name('login');
     Route::post('login', [AdminAuthController::class, 'login'])->name('login.attempt');
 });
@@ -27,6 +29,12 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
+
+    // Modules → Organisation CRUD.
+    // Route::resource('/organisations', OrganisationController::class);
+    //Route::get('/organisations', [OrganisationController::class, 'index'])->name('organisations.index');
+    Route::resource('/organisations', OrganisationController::class);
+    Route::resource('/institutions', InstitutionController::class);
 
     Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
 });

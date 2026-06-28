@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('database_name')->nullable();
             $table->boolean('is_active')->default(true);
             $table->json('metadata')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
