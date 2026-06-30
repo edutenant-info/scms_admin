@@ -30,6 +30,14 @@
                class="ni {{ request()->routeIs('admin.dashboard-templates.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-table-columns nic"></i> Dashboard Templates
             </a>
+            <a href="{{ route('admin.institution-types.index') }}"
+               class="ni {{ request()->routeIs('admin.institution-types.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-layer-group nic"></i> Institution Types
+            </a>
+            <a href="{{ route('admin.boards.index') }}"
+               class="ni {{ request()->routeIs('admin.boards.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-clipboard-list nic"></i> Boards
+            </a>
         </div>
         <div class="ns">
             <div class="nst">System</div>

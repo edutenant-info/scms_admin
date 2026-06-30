@@ -36,7 +36,6 @@
                 <tbody>
                     @forelse ($institutions as $institution)
                         @php
-                            $meta = $institution->metadata ?? [];
                             $initials = strtoupper(mb_substr($institution->name, 0, 2));
                         @endphp
                         <tr>
@@ -51,15 +50,15 @@
                             </td>
                             <td>{{ $institution->organisation->name ?? '—' }}</td>
                             <td>
-                                @if (!empty($meta['type']))
-                                    <span class="bp2 bp-ac">{{ $meta['type'] }}</span>
+                                @if ($institution->institutionType)
+                                    <span class="bp2 bp-ac">{{ $institution->institutionType->name }}</span>
                                 @else
                                     <span style="color:var(--t3);">—</span>
                                 @endif
                             </td>
                             <td>
-                                @if (!empty($meta['board']))
-                                    <span class="bp2 bp-gr">{{ $meta['board'] }}</span>
+                                @if ($institution->board)
+                                    <span class="bp2 bp-gr">{{ $institution->board->name }}</span>
                                 @else
                                     <span style="color:var(--t3);">—</span>
                                 @endif

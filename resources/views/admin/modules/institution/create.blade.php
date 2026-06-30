@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('admin.institutions.store') }}">
+    <form method="POST" action="{{ route('admin.institutions.store') }}" enctype="multipart/form-data">
         @csrf
         @include('admin.modules.institution._form')
     </form>

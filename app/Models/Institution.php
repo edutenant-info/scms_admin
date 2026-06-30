@@ -1,57 +1,50 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Institution extends Model
 {
-    use HasFactory; //, SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'uid',
         'organisation_id',
-        'board_id',
         'institution_type_id',
-        'stream_id',
-        'combination_id',
-        'standard_id',
-        'semester_id',
-        'section_id',
+        'board_id',
+        'dashboard_template_id',
         'name',
-        'display_name',
         'slug',
-        'domain',
         'email',
         'mobile',
-        'landline',
-        'institution_logo',
-        'fav_icon',
-        'area_partner_name',
-        'area_partner_email',
-        'area_partner_phone',
+        'password',
+        'sub_domain',
+        'domain',
         'zonal_partner_name',
-        'po_date',
-        'po_effective_date',
-        'contract_period',
-        'priority',
+        'logo',
+        'fav_icon',
+        'database_name',
         'is_active',
-        'metadata'
+        'metadata',
+    ];
+
+    protected $hidden = [
+        'password',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
-            'po_date' => 'date',
-            'po_effective_date' => 'date',
-            'priority' => 'integer',
-            'metadata' => 'json'
+            'metadata' => 'json',
         ];
     }
 
@@ -70,40 +63,18 @@ class Institution extends Model
         return $this->belongsTo(Board::class);
     }
 
-    public function stream(): BelongsTo
+    public function dashboardTemplate(): BelongsTo
     {
-        return $this->belongsTo(Stream::class);
+        return $this->belongsTo(DashboardTemplate::class);
     }
 
-    public function combination(): BelongsTo
+    public function partners(): HasMany
     {
-        return $this->belongsTo(Combination::class);
-    }
-
-    public function standard(): BelongsTo
-    {
-        return $this->belongsTo(Standard::class);
-    }
-
-    public function semester(): BelongsTo
-    {
-        return $this->belongsTo(Semester::class);
-    }
-
-    public function section(): BelongsTo
-    {
-        return $this->belongsTo(Section::class);
+        return $this->hasMany(InstitutionPartner::class);
     }
 
     public function institutionAddress(): HasOne
     {
         return $this->hasOne(InstitutionAddress::class);
-    }
-
-    public function modules(): BelongsToMany
-    {
-        return $this->belongsToMany(Module::class)
-            ->withPivot('is_active')
-            ->withTimestamps();
     }
 }

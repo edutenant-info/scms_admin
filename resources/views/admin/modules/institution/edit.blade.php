@@ -15,7 +15,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('admin.institutions.update', $institution) }}">
+    <form method="POST" action="{{ route('admin.institutions.update', $institution) }}" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         @include('admin.modules.institution._form')

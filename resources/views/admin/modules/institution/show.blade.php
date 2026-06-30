@@ -2,8 +2,6 @@
 
 @section('content')
 @php
-    $meta = $institution->metadata ?? [];
-    $addr = $institution->institutionAddress;
     $initials = strtoupper(mb_substr($institution->name, 0, 2));
 @endphp
 <div class="vs active">
@@ -35,8 +33,8 @@
             <div style="font-size:12px;color:var(--t3);">{{ $institution->organisation->name ?? '—' }}</div>
         </div>
         <div style="display:flex;gap:7px;align-items:center;">
-            @if (!empty($meta['type']))<span class="bp2 bp-ac">{{ $meta['type'] }}</span>@endif
-            @if (!empty($meta['board']))<span class="bp2 bp-gr">{{ $meta['board'] }}</span>@endif
+            @if ($institution->institutionType)<span class="bp2 bp-ac">{{ $institution->institutionType->name }}</span>@endif
+            @if ($institution->board)<span class="bp2 bp-gr">{{ $institution->board->name }}</span>@endif
             @if ($institution->is_active)
                 <span class="bdg bg-act">Active</span>
             @else
@@ -52,32 +50,43 @@
             <div class="cb">
                 <div class="tw"><table>
                     <tr><th>Organisation</th><td>{{ $institution->organisation->name ?? '—' }}</td></tr>
-                    <tr><th>Display Name</th><td>{{ $meta['display_name'] ?? '—' }}</td></tr>
                     <tr><th>Slug</th><td>{{ $institution->slug }}</td></tr>
-                    <tr><th>Type</th><td>{{ $meta['type'] ?? '—' }}</td></tr>
-                    <tr><th>Board</th><td>{{ $meta['board'] ?? '—' }}</td></tr>
+                    <tr><th>Institution Type</th><td>{{ $institution->institutionType->name ?? '—' }}</td></tr>
+                    <tr><th>Board</th><td>{{ $institution->board->name ?? '—' }}</td></tr>
+                    <tr><th>Email</th><td>{{ $institution->email }}</td></tr>
+                    <tr><th>Mobile</th><td>{{ $institution->mobile }}</td></tr>
+                    <tr><th>Sub-domain</th><td>{{ $institution->sub_domain ?? '—' }}</td></tr>
+                    <tr><th>Domain</th><td>{{ $institution->domain ?? '—' }}</td></tr>
+                    <tr><th>Dashboard Template</th><td>{{ $institution->dashboardTemplate->name ?? '—' }}</td></tr>
                     <tr><th>Database Name</th><td>{{ $institution->database_name ?? '—' }}</td></tr>
                     <tr><th>Status</th><td>{{ $institution->is_active ? 'Active' : 'Inactive' }}</td></tr>
                 </table></div>
             </div>
         </div>
 
-        {{-- Address --}}
+        {{-- Partners --}}
         <div class="cd">
-            <div class="ch"><span class="ctit">Address</span></div>
+            <div class="ch"><span class="ctit">Partners</span></div>
             <div class="cb">
-                @if ($addr)
-                    <div class="tw"><table>
-                        <tr><th>Address</th><td>{{ $addr->address ?? '—' }}</td></tr>
-                        <tr><th>City</th><td>{{ $addr->city ?? '—' }}</td></tr>
-                        <tr><th>District</th><td>{{ $addr->district ?? '—' }}</td></tr>
-                        <tr><th>State</th><td>{{ $addr->state ?? '—' }}</td></tr>
-                        <tr><th>Country</th><td>{{ $addr->country ?? '—' }}</td></tr>
-                        <tr><th>Pincode</th><td>{{ $addr->pincode ?? '—' }}</td></tr>
-                        <tr><th>Post Office</th><td>{{ $addr->post_office ?? '—' }}</td></tr>
+                <div class="tw"><table>
+                    <tr><th>Zonal Partner</th><td>{{ $institution->zonal_partner_name ?? '—' }}</td></tr>
+                </table></div>
+
+                @if ($institution->partners->count())
+                    <div class="tw" style="margin-top:12px;"><table>
+                        <thead><tr><th>Name</th><th>Designation</th><th>Mobile</th></tr></thead>
+                        <tbody>
+                            @foreach ($institution->partners as $partner)
+                                <tr>
+                                    <td>{{ $partner->name }}</td>
+                                    <td>{{ $partner->designation ?? '—' }}</td>
+                                    <td>{{ $partner->mobile }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
                     </table></div>
                 @else
-                    <p style="color:var(--t3);font-size:13px;">No address recorded.</p>
+                    <p style="color:var(--t3);font-size:13px;margin-top:10px;">No partner contacts recorded.</p>
                 @endif
             </div>
         </div>

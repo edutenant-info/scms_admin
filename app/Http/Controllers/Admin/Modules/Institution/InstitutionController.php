@@ -33,6 +33,9 @@ class InstitutionController extends Controller
         return view('admin.modules.institution.create', [
             'institution' => new Institution(),
             'organisations' => $this->institutions->organisationOptions(),
+            'institutionTypes' => $this->institutions->institutionTypeOptions(),
+            'boards' => $this->institutions->boardOptions(),
+            'dashboardTemplates' => $this->institutions->dashboardTemplateOptions(),
         ]);
     }
 
@@ -47,18 +50,21 @@ class InstitutionController extends Controller
 
     public function show(Institution $institution): View
     {
-        $institution->load(['organisation', 'institutionAddress']);
+        $institution->load(['organisation', 'institutionType', 'board', 'dashboardTemplate', 'partners']);
 
         return view('admin.modules.institution.show', compact('institution'));
     }
 
     public function edit(Institution $institution): View
     {
-        $institution->load(['institutionAddress']);
+        $institution->load(['partners']);
 
         return view('admin.modules.institution.edit', [
             'institution' => $institution,
             'organisations' => $this->institutions->organisationOptions(),
+            'institutionTypes' => $this->institutions->institutionTypeOptions(),
+            'boards' => $this->institutions->boardOptions(),
+            'dashboardTemplates' => $this->institutions->dashboardTemplateOptions(),
         ]);
     }
 

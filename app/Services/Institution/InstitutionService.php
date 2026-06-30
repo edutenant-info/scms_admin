@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace App\Services\Institution;
 
+use App\Models\Board;
+use App\Models\DashboardTemplate;
 use App\Models\Institution;
+use App\Models\InstitutionType;
 use App\Repositories\Contracts\InstitutionRepositoryInterface;
 use App\Repositories\Contracts\OrganisationRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 
 class InstitutionService
 {
@@ -38,17 +44,43 @@ class InstitutionService
     }
 
     /**
+     * @return Collection<int, string>
+     */
+    public function institutionTypeOptions(): Collection
+    {
+        return InstitutionType::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id');
+    }
+
+    /**
+     * @return Collection<int, string>
+     */
+    public function boardOptions(): Collection
+    {
+        return Board::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id');
+    }
+
+    /**
+     * @return Collection<int, string>
+     */
+    public function dashboardTemplateOptions(): Collection
+    {
+        return DashboardTemplate::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id');
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      */
     public function create(array $data): Institution
     {
         return DB::transaction(function () use ($data) {
             $attributes = $this->mapAttributes($data);
+            $attributes['uid'] = (string) Str::uuid();
+            $attributes['password'] = Hash::make($data['password']);
 
             /** @var Institution $institution */
             $institution = $this->institutions->create($attributes);
 
-            $this->syncAddress($institution, $data);
+            $this->syncPartners($institution, $data);
 
             return $institution;
         });
@@ -62,10 +94,14 @@ class InstitutionService
         return DB::transaction(function () use ($institution, $data) {
             $attributes = $this->mapAttributes($data, $institution);
 
+            if (! empty($data['password'])) {
+                $attributes['password'] = Hash::make($data['password']);
+            }
+
             /** @var Institution $institution */
             $institution = $this->institutions->update($institution, $attributes);
 
-            $this->syncAddress($institution, $data);
+            $this->syncPartners($institution, $data);
 
             return $institution;
         });
@@ -77,7 +113,7 @@ class InstitutionService
     }
 
     /**
-     * Map validated input onto institution column attributes (excludes relations).
+     * Map validated input onto institution column attributes (excludes password & relations).
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
@@ -86,52 +122,53 @@ class InstitutionService
     {
         $attributes = Arr::only($data, [
             'organisation_id',
+            'institution_type_id',
+            'board_id',
+            'dashboard_template_id',
             'name',
             'slug',
+            'email',
+            'mobile',
+            'sub_domain',
+            'domain',
+            'zonal_partner_name',
             'database_name',
         ]);
 
         $attributes['is_active'] = (bool) ($data['is_active'] ?? false);
 
-        // type & board have no dedicated columns — persist them in metadata,
-        // preserving any other metadata already stored on the model.
-        $metadata = $existing?->metadata ?? [];
-        if (array_key_exists('type', $data)) {
-            $metadata['type'] = $data['type'] ?: null;
+        if (($data['logo'] ?? null) instanceof UploadedFile) {
+            $attributes['logo'] = $data['logo']->store('institutions/logos', 'public');
         }
-        if (array_key_exists('board', $data)) {
-            $metadata['board'] = $data['board'] ?: null;
+
+        if (($data['fav_icon'] ?? null) instanceof UploadedFile) {
+            $attributes['fav_icon'] = $data['fav_icon']->store('institutions/favicons', 'public');
         }
-        if (array_key_exists('display_name', $data)) {
-            $metadata['display_name'] = $data['display_name'] ?: null;
-        }
-        $metadata = array_filter($metadata, static fn ($value) => $value !== null && $value !== '');
-        $attributes['metadata'] = $metadata !== [] ? $metadata : null;
 
         return $attributes;
     }
 
     /**
+     * Replace the institution's partner contacts with the submitted set.
+     *
      * @param  array<string, mixed>  $data
      */
-    private function syncAddress(Institution $institution, array $data): void
+    private function syncPartners(Institution $institution, array $data): void
     {
-        $addressData = Arr::only($data, [
-            'address',
-            'pincode',
-            'post_office',
-            'country',
-            'state',
-            'district',
-            'taluk',
-            'city',
-        ]);
+        $partners = collect($data['partners'] ?? [])
+            ->filter(static fn ($p) => filled($p['name'] ?? null) || filled($p['mobile'] ?? null))
+            ->map(static fn ($p) => [
+                'name' => $p['name'] ?? '',
+                'designation' => $p['designation'] ?? null,
+                'mobile' => $p['mobile'] ?? '',
+            ])
+            ->values();
 
-        // Skip entirely if every address field is blank.
-        if (count(array_filter($addressData, static fn ($v) => filled($v))) === 0) {
-            return;
+        // Replace the full set on every save.
+        $institution->partners()->delete();
+
+        if ($partners->isNotEmpty()) {
+            $institution->partners()->createMany($partners->all());
         }
-
-        $institution->institutionAddress()->updateOrCreate([], $addressData);
     }
 }

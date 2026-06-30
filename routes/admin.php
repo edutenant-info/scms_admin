@@ -3,7 +3,9 @@
 use App\Http\Controllers\Admin\Auth\AdminAuthController;
 use App\Http\Controllers\Admin\Modules\Institution\InstitutionController;
 use App\Http\Controllers\Admin\Modules\Organisation\OrganisationController;
+use App\Http\Controllers\Admin\Settings\BoardController;
 use App\Http\Controllers\Admin\Settings\DashboardTemplateController;
+use App\Http\Controllers\Admin\Settings\InstitutionTypeController;
 use App\Http\Controllers\Admin\Settings\LoginTemplateController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +43,10 @@ Route::middleware('auth:admin')->group(function () {
     // Settings → Template CRUD (used by the organisation onboarding dropdowns).
     Route::resource('/login-templates', LoginTemplateController::class)->except('show');
     Route::resource('/dashboard-templates', DashboardTemplateController::class)->except('show');
+
+    // Settings → Institution lookups (used by the institution onboarding dropdowns).
+    Route::resource('/institution-types', InstitutionTypeController::class)->except('show');
+    Route::resource('/boards', BoardController::class)->except('show');
 
     Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
 });
