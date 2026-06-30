@@ -91,38 +91,26 @@ class OrganisationService
         $attributes = Arr::only($data, [
             'name',
             'slug',
+            'sub_domain',
             'domain',
             'email',
             'mobile',
-            'login_template',
-            'dashboard_template',
+            'login_template_id',
+            'dashboard_template_id',
             'po_date',
             'po_effective_date',
             'contract_period',
-            'is_email_sms',
-            'vendor_type',
-            'sms_vendor',
-            'payment_gateway_vendor',
         ]);
 
         $attributes['is_2fa_enabled'] = (bool) ($data['is_2fa_enabled'] ?? false);
-        $attributes['must_reset_password'] = (bool) ($data['must_reset_password'] ?? false);
         $attributes['is_active'] = (bool) ($data['is_active'] ?? false);
-
-        // type & plan have no dedicated columns — persist them in metadata,
-        // preserving any other metadata already stored on the model.
-        $metadata = $existing?->metadata ?? [];
-        if (array_key_exists('type', $data)) {
-            $metadata['type'] = $data['type'] ?: null;
-        }
-        if (array_key_exists('plan', $data)) {
-            $metadata['plan'] = $data['plan'] ?: null;
-        }
-        $metadata = array_filter($metadata, static fn ($value) => $value !== null && $value !== '');
-        $attributes['metadata'] = $metadata !== [] ? $metadata : null;
 
         if (($data['logo'] ?? null) instanceof UploadedFile) {
             $attributes['logo'] = $data['logo']->store('organisations/logos', 'public');
+        }
+
+        if (($data['fav_icon'] ?? null) instanceof UploadedFile) {
+            $attributes['fav_icon'] = $data['fav_icon']->store('organisations/favicons', 'public');
         }
 
         if (($data['mou_document'] ?? null) instanceof UploadedFile) {

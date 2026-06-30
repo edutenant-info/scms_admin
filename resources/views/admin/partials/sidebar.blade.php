@@ -13,11 +13,22 @@
             <div class="nst">Modules</div>
             <a href="{{ route('admin.organisations.index') }}"
                class="ni {{ request()->routeIs('admin.organisations.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-buildings nic"></i> Organisations
+                <i class="fa-solid fa-building nic"></i> Organisations
             </a>
             <a href="{{ route('admin.institutions.index') }}"
                class="ni {{ request()->routeIs('admin.institutions.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-school nic"></i> Institutions
+            </a>
+        </div>
+        <div class="ns">
+            <div class="nst">Settings</div>
+            <a href="{{ route('admin.login-templates.index') }}"
+               class="ni {{ request()->routeIs('admin.login-templates.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-right-to-bracket nic"></i> Login Templates
+            </a>
+            <a href="{{ route('admin.dashboard-templates.index') }}"
+               class="ni {{ request()->routeIs('admin.dashboard-templates.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-table-columns nic"></i> Dashboard Templates
             </a>
         </div>
         <div class="ns">

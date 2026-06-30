@@ -7,6 +7,8 @@ namespace App\Http\Controllers\Admin\Modules\Organisation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Organisation\StoreOrganisationRequest;
 use App\Http\Requests\Admin\Organisation\UpdateOrganisationRequest;
+use App\Models\DashboardTemplate;
+use App\Models\LoginTemplate;
 use App\Models\Organisation;
 use App\Services\Organisation\OrganisationService;
 use Illuminate\Contracts\View\View;
@@ -32,6 +34,8 @@ class OrganisationController extends Controller
     {
         return view('admin.modules.organisation.create', [
             'organisation' => new Organisation(),
+            'loginTemplates' => LoginTemplate::where('is_active', true)->orderBy('name')->get(),
+            'dashboardTemplates' => DashboardTemplate::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -46,7 +50,7 @@ class OrganisationController extends Controller
 
     public function show(Organisation $organisation): View
     {
-        $organisation->load(['address', 'pocs', 'institutions']);
+        $organisation->load(['address', 'pocs', 'institutions', 'loginTemplate', 'dashboardTemplate']);
 
         return view('admin.modules.organisation.show', compact('organisation'));
     }
@@ -55,7 +59,11 @@ class OrganisationController extends Controller
     {
         $organisation->load(['address', 'pocs']);
 
-        return view('admin.modules.organisation.edit', compact('organisation'));
+        return view('admin.modules.organisation.edit', [
+            'organisation' => $organisation,
+            'loginTemplates' => LoginTemplate::where('is_active', true)->orderBy('name')->get(),
+            'dashboardTemplates' => DashboardTemplate::where('is_active', true)->orderBy('name')->get(),
+        ]);
     }
 
     public function update(UpdateOrganisationRequest $request, Organisation $organisation): RedirectResponse

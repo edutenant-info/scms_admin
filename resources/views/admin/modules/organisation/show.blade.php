@@ -38,7 +38,6 @@
             @endif
         </div>
         <div style="display:flex;gap:7px;align-items:center;">
-            @if (!empty($meta['plan']))<span class="bp2 bp-ac">{{ $meta['plan'] }}</span>@endif
             @if ($organisation->is_active)
                 <span class="bdg bg-act">Active</span>
             @else
@@ -53,13 +52,12 @@
             <div class="ch"><span class="ctit">Details</span></div>
             <div class="cb">
                 <div class="tw"><table>
-                    <tr><th>Type</th><td>{{ $meta['type'] ?? '—' }}</td></tr>
-                    <tr><th>Plan</th><td>{{ $meta['plan'] ?? '—' }}</td></tr>
                     <tr><th>Slug</th><td>{{ $organisation->slug }}</td></tr>
+                    <tr><th>Sub-domain</th><td>{{ $organisation->sub_domain ?? '—' }}</td></tr>
                     <tr><th>Domain</th><td>{{ $organisation->domain ?? '—' }}</td></tr>
-                    <tr><th>Login Template</th><td>{{ $organisation->login_template ?? '—' }}</td></tr>
-                    <tr><th>Dashboard Template</th><td>{{ $organisation->dashboard_template ?? '—' }}</td></tr>
-                    <tr><th>Contract Period</th><td>{{ $organisation->contract_period ?? '—' }}</td></tr>
+                    <tr><th>Login Template</th><td>{{ $organisation->loginTemplate->name ?? '—' }}</td></tr>
+                    <tr><th>Dashboard Template</th><td>{{ $organisation->dashboardTemplate->name ?? '—' }}</td></tr>
+                    <tr><th>Contract Period</th><td>{{ $organisation->contract_period ? $organisation->contract_period . ' month(s)' : '—' }}</td></tr>
                     <tr><th>PO Date</th><td>{{ optional($organisation->po_date)->format('M d, Y') ?? '—' }}</td></tr>
                     <tr><th>PO Effective</th><td>{{ optional($organisation->po_effective_date)->format('M d, Y') ?? '—' }}</td></tr>
                     <tr><th>2FA</th><td>{{ $organisation->is_2fa_enabled ? 'Enabled' : 'Disabled' }}</td></tr>

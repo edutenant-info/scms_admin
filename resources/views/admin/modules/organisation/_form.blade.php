@@ -1,6 +1,5 @@
 @php
     /** @var \App\Models\Organisation $organisation */
-    $meta = $organisation->metadata ?? [];
     $addr = $organisation->address;
 
     $pocRows = old('pocs');
@@ -18,6 +17,9 @@
         $pocRows = [['name' => '', 'designation' => '', 'mobile' => '', 'email' => '']];
     }
 
+    $loginTemplates = $loginTemplates ?? collect();
+    $dashboardTemplates = $dashboardTemplates ?? collect();
+
     $val = fn ($field, $default = null) => old($field, $organisation->{$field} ?? $default);
     $addrVal = fn ($field, $default = null) => old($field, $addr->{$field} ?? $default);
 @endphp
@@ -29,11 +31,12 @@
     </div>
 @endif
 
-<div class="tabs">
+<div class="tabs" id="org-tabs">
     <div class="tab active" data-tab="t-details">Details</div>
+    <div class="tab" data-tab="t-templates">Templates &amp; Contract</div>
+    <div class="tab" data-tab="t-branding">Branding</div>
     <div class="tab" data-tab="t-address">Address</div>
     <div class="tab" data-tab="t-contacts">Contacts</div>
-    <div class="tab" data-tab="t-settings">Settings</div>
 </div>
 
 {{-- DETAILS --}}
@@ -42,54 +45,123 @@
         <div class="fgrid">
             <div class="fg">
                 <label>Organisation Name <span style="color:var(--ros);">*</span></label>
-                <input type="text" name="name" id="org-name" class="fi noi" value="{{ $val('name') }}" placeholder="e.g. Sunrise Academy Group">
+                <input type="text" name="name" id="org-name" class="fi noi" value="{{ $val('name') }}" minlength="5" maxlength="180" placeholder="e.g. Sunrise Academy Group">
                 @error('name')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
             </div>
             <div class="fg">
-                <label>Slug / Subdomain <span style="color:var(--ros);">*</span></label>
-                <input type="text" name="slug" id="org-slug" class="fi noi" value="{{ $val('slug') }}" placeholder="sunrise-academy">
+                <label>Slug <span style="font-size:11px;color:var(--t3);">(auto-generated)</span></label>
+                <input type="text" name="slug" id="org-slug" class="fi noi" value="{{ $val('slug') }}" readonly placeholder="sunrise-academy-group">
                 @error('slug')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
             </div>
             <div class="fg">
                 <label>Email <span style="color:var(--ros);">*</span></label>
-                <input type="email" name="email" class="fi noi" value="{{ $val('email') }}" placeholder="admin@org.com">
+                <input type="email" name="email" class="fi noi" value="{{ $val('email') }}" minlength="4" maxlength="70" placeholder="admin@org.com">
                 @error('email')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
             </div>
             <div class="fg">
                 <label>Mobile <span style="color:var(--ros);">*</span></label>
-                <input type="text" name="mobile" class="fi noi" value="{{ $val('mobile') }}" placeholder="+91 98765 43210">
+                <input type="text" name="mobile" class="fi noi" value="{{ $val('mobile') }}" inputmode="numeric" maxlength="10" placeholder="10-digit number">
                 @error('mobile')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
             </div>
             <div class="fg">
-                <label>Custom Domain</label>
-                <input type="text" name="domain" class="fi noi" value="{{ $val('domain') }}" placeholder="app.org.edu.in">
-                @error('domain')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
-            </div>
-            <div class="fg">
                 <label>Password {{ $organisation->exists ? '(leave blank to keep)' : '' }} @unless($organisation->exists)<span style="color:var(--ros);">*</span>@endunless</label>
-                <input type="password" name="password" class="fi noi" placeholder="••••••••" autocomplete="new-password">
+                <input type="password" name="password" class="fi noi" minlength="3" maxlength="20" placeholder="••••••••" autocomplete="new-password">
                 @error('password')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
             </div>
             <div class="fg">
-                <label>Organisation Type</label>
-                <select name="type" class="fs">
-                    @php $types = ['K-12 School Group', 'Higher Education', 'Educational Trust', 'University', 'Coaching Institute']; @endphp
-                    <option value="">Select type…</option>
-                    @foreach ($types as $t)
-                        <option value="{{ $t }}" @selected(old('type', $meta['type'] ?? '') === $t)>{{ $t }}</option>
-                    @endforeach
-                </select>
+                <label>Confirm Password @unless($organisation->exists)<span style="color:var(--ros);">*</span>@endunless</label>
+                <input type="password" name="password_confirmation" class="fi noi" minlength="3" maxlength="20" placeholder="••••••••" autocomplete="new-password">
             </div>
             <div class="fg">
-                <label>Subscription Plan</label>
-                <select name="plan" class="fs">
-                    @php $plans = ['Starter', 'Growth', 'Enterprise']; @endphp
-                    <option value="">Select plan…</option>
-                    @foreach ($plans as $p)
-                        <option value="{{ $p }}" @selected(old('plan', $meta['plan'] ?? '') === $p)>{{ $p }}</option>
+                <label>Sub-domain <span style="font-size:11px;color:var(--t3);">(optional)</span></label>
+                <input type="text" name="sub_domain" class="fi noi" value="{{ $val('sub_domain') }}" minlength="3" maxlength="70" placeholder="sunrise">
+                @error('sub_domain')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+            </div>
+            <div class="fg">
+                <label>Custom Domain <span style="font-size:11px;color:var(--t3);">(optional)</span></label>
+                <input type="text" name="domain" class="fi noi" value="{{ $val('domain') }}" minlength="3" maxlength="100" placeholder="app.org.edu.in">
+                @error('domain')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+            </div>
+        </div>
+    </div></div>
+</div>
+
+{{-- TEMPLATES & CONTRACT --}}
+<div class="tbc" id="t-templates">
+    <div class="cd"><div class="cb">
+        <div class="fgrid">
+            <div class="fg">
+                <label>Login Template <span style="color:var(--ros);">*</span></label>
+                <select name="login_template_id" class="fs">
+                    <option value="">Select login template…</option>
+                    @foreach ($loginTemplates as $tpl)
+                        <option value="{{ $tpl->id }}" @selected((string) $val('login_template_id') === (string) $tpl->id)>{{ $tpl->name }}</option>
                     @endforeach
                 </select>
+                @error('login_template_id')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
             </div>
+            <div class="fg">
+                <label>Dashboard Template <span style="color:var(--ros);">*</span></label>
+                <select name="dashboard_template_id" class="fs">
+                    <option value="">Select dashboard template…</option>
+                    @foreach ($dashboardTemplates as $tpl)
+                        <option value="{{ $tpl->id }}" @selected((string) $val('dashboard_template_id') === (string) $tpl->id)>{{ $tpl->name }}</option>
+                    @endforeach
+                </select>
+                @error('dashboard_template_id')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+            </div>
+            <div class="fg">
+                <label>PO Date</label>
+                <input type="date" name="po_date" class="fi noi" value="{{ old('po_date', optional($organisation->po_date)->format('Y-m-d')) }}">
+                @error('po_date')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+            </div>
+            <div class="fg">
+                <label>PO Effective Date</label>
+                <input type="date" name="po_effective_date" class="fi noi" value="{{ old('po_effective_date', optional($organisation->po_effective_date)->format('Y-m-d')) }}">
+                @error('po_effective_date')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+            </div>
+            <div class="fg">
+                <label>Contract Period (months)</label>
+                <input type="number" name="contract_period" class="fi noi" value="{{ $val('contract_period') }}" min="1" max="100" step="1" placeholder="e.g. 12">
+                @error('contract_period')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+            </div>
+            <div class="fg">
+                <label>MOU Document <span style="font-size:11px;color:var(--t3);">(pdf, doc, docx)</span></label>
+                <input type="file" name="mou_document" class="fi noi" accept=".pdf,.doc,.docx">
+                @if ($organisation->mou_document)<div style="font-size:11px;color:var(--t3);margin-top:4px;">Current: {{ basename($organisation->mou_document) }}</div>@endif
+                @error('mou_document')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+            </div>
+        </div>
+    </div></div>
+</div>
+
+{{-- BRANDING --}}
+<div class="tbc" id="t-branding">
+    <div class="cd"><div class="cb">
+        <div class="fgrid">
+            <div class="fg">
+                <label>Logo @unless($organisation->exists)<span style="color:var(--ros);">*</span>@endunless</label>
+                <input type="file" name="logo" class="fi noi" accept="image/*">
+                @if ($organisation->logo)<div style="font-size:11px;color:var(--t3);margin-top:4px;">Current: {{ basename($organisation->logo) }}</div>@endif
+                @error('logo')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+            </div>
+            <div class="fg">
+                <label>Favicon @unless($organisation->exists)<span style="color:var(--ros);">*</span>@endunless</label>
+                <input type="file" name="fav_icon" class="fi noi" accept="image/*">
+                @if ($organisation->fav_icon)<div style="font-size:11px;color:var(--t3);margin-top:4px;">Current: {{ basename($organisation->fav_icon) }}</div>@endif
+                @error('fav_icon')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+            </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:18px;padding-top:18px;border-top:1px solid var(--bdr);">
+            <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer;">
+                <span class="sw"><input type="checkbox" name="is_2fa_enabled" value="1" @checked(old('is_2fa_enabled', $organisation->is_2fa_enabled ?? false))><span class="sl"></span></span>
+                2FA Enabled
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer;">
+                <span class="sw"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $organisation->is_active ?? true))><span class="sl"></span></span>
+                Active
+            </label>
         </div>
     </div></div>
 </div>
@@ -119,127 +191,124 @@
 <div class="tbc" id="t-contacts">
     <div class="cd">
         <div class="ch">
-            <span class="ctit">Points of Contact</span>
+            <span class="ctit">Points of Contact <span style="color:var(--ros);">*</span></span>
             <button type="button" class="btn bo bs" id="add-poc"><i class="fa-solid fa-plus"></i> Add Contact</button>
         </div>
         <div class="cb">
             <div id="poc-rows">
                 @foreach ($pocRows as $i => $poc)
-                    <div class="poc-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:9px;align-items:end;margin-bottom:10px;">
-                        <div class="fg" style="margin:0;"><label>Name</label><input type="text" name="pocs[{{ $i }}][name]" class="fi noi" value="{{ $poc['name'] ?? '' }}" placeholder="John Doe"></div>
-                        <div class="fg" style="margin:0;"><label>Designation</label><input type="text" name="pocs[{{ $i }}][designation]" class="fi noi" value="{{ $poc['designation'] ?? '' }}" placeholder="Director"></div>
-                        <div class="fg" style="margin:0;"><label>Mobile</label><input type="text" name="pocs[{{ $i }}][mobile]" class="fi noi" value="{{ $poc['mobile'] ?? '' }}" placeholder="+91…"></div>
-                        <div class="fg" style="margin:0;"><label>Email</label><input type="email" name="pocs[{{ $i }}][email]" class="fi noi" value="{{ $poc['email'] ?? '' }}" placeholder="poc@org.com"></div>
-                        <button type="button" class="bi dng remove-poc" title="Remove"><i class="fa-solid fa-trash-can"></i></button>
+                    <div class="poc-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:9px;align-items:start;margin-bottom:10px;">
+                        <div class="fg" style="margin:0;">
+                            <label>Name</label>
+                            <input type="text" name="pocs[{{ $i }}][name]" class="fi noi" value="{{ $poc['name'] ?? '' }}" minlength="3" maxlength="50" placeholder="John Doe">
+                            @error("pocs.$i.name")<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="fg" style="margin:0;">
+                            <label>Designation</label>
+                            <input type="text" name="pocs[{{ $i }}][designation]" class="fi noi" value="{{ $poc['designation'] ?? '' }}" minlength="3" maxlength="50" placeholder="Director">
+                            @error("pocs.$i.designation")<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="fg" style="margin:0;">
+                            <label>Mobile</label>
+                            <input type="text" name="pocs[{{ $i }}][mobile]" class="fi noi" value="{{ $poc['mobile'] ?? '' }}" inputmode="numeric" maxlength="10" placeholder="10-digit">
+                            @error("pocs.$i.mobile")<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="fg" style="margin:0;">
+                            <label>Email</label>
+                            <input type="email" name="pocs[{{ $i }}][email]" class="fi noi" value="{{ $poc['email'] ?? '' }}" minlength="4" maxlength="50" placeholder="poc@org.com">
+                            @error("pocs.$i.email")<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
+                        </div>
+                        <button type="button" class="bi dng remove-poc" title="Remove" style="margin-top:22px;"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 @endforeach
             </div>
-            <p style="font-size:11px;color:var(--t3);margin-top:6px;">Blank rows are ignored. A contact needs at least a name or mobile to be saved.</p>
+            <p style="font-size:11px;color:var(--t3);margin-top:6px;">At least one contact is required. All fields on each contact row are mandatory.</p>
         </div>
     </div>
 </div>
 
-{{-- SETTINGS --}}
-<div class="tbc" id="t-settings">
-    <div class="cd"><div class="cb">
-        <div class="fgrid">
-            <div class="fg">
-                <label>Login Template</label>
-                <input type="text" name="login_template" class="fi noi" value="{{ $val('login_template', 'login-1') }}">
-            </div>
-            <div class="fg">
-                <label>Dashboard Template</label>
-                <input type="text" name="dashboard_template" class="fi noi" value="{{ $val('dashboard_template', 'dashboard-1') }}">
-            </div>
-            <div class="fg">
-                <label>PO Date</label>
-                <input type="date" name="po_date" class="fi noi" value="{{ old('po_date', optional($organisation->po_date)->format('Y-m-d')) }}">
-            </div>
-            <div class="fg">
-                <label>PO Effective Date</label>
-                <input type="date" name="po_effective_date" class="fi noi" value="{{ old('po_effective_date', optional($organisation->po_effective_date)->format('Y-m-d')) }}">
-            </div>
-            <div class="fg">
-                <label>Contract Period</label>
-                <input type="text" name="contract_period" class="fi noi" value="{{ $val('contract_period') }}" placeholder="e.g. 12 months">
-            </div>
-            <div class="fg">
-                <label>Email / SMS Mode</label>
-                <input type="text" name="is_email_sms" class="fi noi" value="{{ $val('is_email_sms') }}" placeholder="e.g. both">
-            </div>
-            <div class="fg">
-                <label>Vendor Type</label>
-                <input type="text" name="vendor_type" class="fi noi" value="{{ $val('vendor_type') }}">
-            </div>
-            <div class="fg">
-                <label>SMS Vendor</label>
-                <input type="text" name="sms_vendor" class="fi noi" value="{{ $val('sms_vendor') }}">
-            </div>
-            <div class="fg">
-                <label>Payment Gateway Vendor</label>
-                <input type="text" name="payment_gateway_vendor" class="fi noi" value="{{ $val('payment_gateway_vendor') }}">
-            </div>
-            <div class="fg">
-                <label>Logo</label>
-                <input type="file" name="logo" class="fi noi" accept="image/*">
-                @if ($organisation->logo)<div style="font-size:11px;color:var(--t3);margin-top:4px;">Current: {{ basename($organisation->logo) }}</div>@endif
-                @error('logo')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
-            </div>
-            <div class="fg">
-                <label>MOU Document</label>
-                <input type="file" name="mou_document" class="fi noi" accept=".pdf,.doc,.docx">
-                @if ($organisation->mou_document)<div style="font-size:11px;color:var(--t3);margin-top:4px;">Current: {{ basename($organisation->mou_document) }}</div>@endif
-                @error('mou_document')<div style="color:var(--ros);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
-            </div>
-        </div>
-
-        <div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:18px;padding-top:18px;border-top:1px solid var(--bdr);">
-            <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer;">
-                <span class="sw"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $organisation->is_active ?? true))><span class="sl"></span></span>
-                Active
-            </label>
-            <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer;">
-                <span class="sw"><input type="checkbox" name="is_2fa_enabled" value="1" @checked(old('is_2fa_enabled', $organisation->is_2fa_enabled ?? false))><span class="sl"></span></span>
-                2FA Enabled
-            </label>
-            <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer;">
-                <span class="sw"><input type="checkbox" name="must_reset_password" value="1" @checked(old('must_reset_password', $organisation->must_reset_password ?? true))><span class="sl"></span></span>
-                Must Reset Password
-            </label>
-        </div>
-    </div></div>
-</div>
-
-<div style="display:flex;justify-content:flex-end;gap:9px;margin-top:20px;">
+{{-- WIZARD NAVIGATION --}}
+<div style="display:flex;justify-content:space-between;gap:9px;margin-top:20px;">
     <a href="{{ route('admin.organisations.index') }}" class="btn bo">Cancel</a>
-    <button type="submit" class="btn ba"><i class="fa-solid fa-save"></i> {{ $organisation->exists ? 'Update' : 'Create' }} Organisation</button>
+    <div style="display:flex;gap:9px;">
+        <button type="button" class="btn bo" id="wiz-back" style="display:none;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button type="button" class="btn ba" id="wiz-next">Next <i class="fa-solid fa-arrow-right"></i></button>
+        <button type="submit" class="btn ba" id="wiz-submit" style="display:none;"><i class="fa-solid fa-save"></i> {{ $organisation->exists ? 'Update' : 'Create' }} Organisation</button>
+    </div>
 </div>
 
 @push('scripts')
 <script>
 $(function () {
-    // Auto-suggest slug from name (only while slug is untouched / empty).
-    var slugTouched = $('#org-slug').val().length > 0;
-    $('#org-slug').on('input', function () { slugTouched = true; });
-    $('#org-name').on('input', function () {
-        if (slugTouched) return;
-        var slug = $(this).val().toLowerCase().trim()
+    // Auto-generate slug from organisation name.
+    function slugify(v) {
+        return v.toLowerCase().trim()
             .replace(/[^a-z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-');
-        $('#org-slug').val(slug);
+    }
+    $('#org-name').on('input', function () {
+        $('#org-slug').val(slugify($(this).val()));
     });
 
-    // Repeatable POC rows.
+    // Restrict mobile inputs to digits.
+    $(document).on('input', 'input[name="mobile"], input[name^="pocs"][name$="[mobile]"]', function () {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+    });
+
+    // ----- Tab wizard navigation -----
+    var $tabs = $('#org-tabs .tab');
+    var order = $tabs.map(function () { return $(this).data('tab'); }).get();
+
+    function currentIndex() {
+        var active = $('#org-tabs .tab.active').data('tab');
+        var idx = order.indexOf(active);
+        return idx < 0 ? 0 : idx;
+    }
+
+    function goTo(idx) {
+        idx = Math.max(0, Math.min(order.length - 1, idx));
+        var id = order[idx];
+        $('#org-tabs .tab').removeClass('active');
+        $('#org-tabs .tab[data-tab="' + id + '"]').addClass('active');
+        $('.tbc').removeClass('active');
+        $('#' + id).addClass('active');
+        syncButtons(idx);
+    }
+
+    function syncButtons(idx) {
+        $('#wiz-back').toggle(idx > 0);
+        var last = idx === order.length - 1;
+        $('#wiz-next').toggle(!last);
+        $('#wiz-submit').toggle(last);
+    }
+
+    $('#wiz-next').on('click', function () { goTo(currentIndex() + 1); });
+    $('#wiz-back').on('click', function () { goTo(currentIndex() - 1); });
+
+    // Keep wizard buttons in sync when a tab header is clicked directly.
+    $tabs.on('click', function () { syncButtons(order.indexOf($(this).data('tab'))); });
+
+    // If validation failed, jump to the first tab that contains an error message.
+    // Error messages render as <div> with --ros colour; required-field asterisks
+    // are <span>, so the div-only selector ignores them.
+    var $errTbc = $('div.tbc').filter(function () { return $(this).find('div[style*="--ros"]').length > 0; }).first();
+    if ($errTbc.length) {
+        goTo(order.indexOf($errTbc.attr('id')));
+    } else {
+        syncButtons(0);
+    }
+
+    // ----- Repeatable POC rows -----
     var pocIndex = {{ count($pocRows) }};
     $('#add-poc').on('click', function () {
         var row =
-            '<div class="poc-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:9px;align-items:end;margin-bottom:10px;">' +
-            '<div class="fg" style="margin:0;"><label>Name</label><input type="text" name="pocs[' + pocIndex + '][name]" class="fi noi" placeholder="John Doe"></div>' +
-            '<div class="fg" style="margin:0;"><label>Designation</label><input type="text" name="pocs[' + pocIndex + '][designation]" class="fi noi" placeholder="Director"></div>' +
-            '<div class="fg" style="margin:0;"><label>Mobile</label><input type="text" name="pocs[' + pocIndex + '][mobile]" class="fi noi" placeholder="+91…"></div>' +
-            '<div class="fg" style="margin:0;"><label>Email</label><input type="email" name="pocs[' + pocIndex + '][email]" class="fi noi" placeholder="poc@org.com"></div>' +
-            '<button type="button" class="bi dng remove-poc" title="Remove"><i class="fa-solid fa-trash-can"></i></button>' +
+            '<div class="poc-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:9px;align-items:start;margin-bottom:10px;">' +
+            '<div class="fg" style="margin:0;"><label>Name</label><input type="text" name="pocs[' + pocIndex + '][name]" class="fi noi" minlength="3" maxlength="50" placeholder="John Doe"></div>' +
+            '<div class="fg" style="margin:0;"><label>Designation</label><input type="text" name="pocs[' + pocIndex + '][designation]" class="fi noi" minlength="3" maxlength="50" placeholder="Director"></div>' +
+            '<div class="fg" style="margin:0;"><label>Mobile</label><input type="text" name="pocs[' + pocIndex + '][mobile]" class="fi noi" inputmode="numeric" maxlength="10" placeholder="10-digit"></div>' +
+            '<div class="fg" style="margin:0;"><label>Email</label><input type="email" name="pocs[' + pocIndex + '][email]" class="fi noi" minlength="4" maxlength="50" placeholder="poc@org.com"></div>' +
+            '<button type="button" class="bi dng remove-poc" title="Remove" style="margin-top:22px;"><i class="fa-solid fa-trash-can"></i></button>' +
             '</div>';
         $('#poc-rows').append(row);
         pocIndex++;

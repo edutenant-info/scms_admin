@@ -28,7 +28,7 @@
                         <th>Organisation</th>
                         <th>Contact</th>
                         <th>Institutions</th>
-                        <th>Plan</th>
+                        <th>Sub-domain</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -55,8 +55,8 @@
                             </td>
                             <td>{{ $organisation->institutions_count }}</td>
                             <td>
-                                @if (!empty($meta['plan']))
-                                    <span class="bp2 bp-ac">{{ $meta['plan'] }}</span>
+                                @if ($organisation->sub_domain)
+                                    <span class="bp2 bp-ac">{{ $organisation->sub_domain }}</span>
                                 @else
                                     <span style="color:var(--t3);">—</span>
                                 @endif
