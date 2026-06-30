@@ -3357,6 +3357,363 @@ span.flatpickr-weekday {
     }
 }
 
+/* ============================================================
+   REUSABLE FORM COMPONENTS  (TailAdmin-inspired)
+   Toggle · Checkbox · Radio · File upload · Multi-select2
+   All driven by theme tokens (--acc/--bdr/--t*), so they
+   inherit dark / light mode and every accent swatch.
+   Rendered by the <x-form.*> Blade components.
+   ============================================================ */
+
+/* ----- Field scaffolding (label + hint + error) ----- */
+.field {
+    margin-bottom: 18px
+}
+
+.field > .field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--t2);
+    margin-bottom: 7px;
+    text-transform: uppercase;
+    letter-spacing: .5px
+}
+
+.field-req {
+    color: var(--ros);
+    margin-left: 2px
+}
+
+.field-error {
+    color: var(--ros);
+    font-size: 11px;
+    margin-top: 5px
+}
+
+.field-hint {
+    color: var(--t3);
+    font-size: 11px;
+    margin-top: 5px
+}
+
+/* ----- Toggle switch ----- */
+.tgl {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 14px;
+    color: var(--t2);
+    line-height: 1.3
+}
+
+.tgl > input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    min-width: 0;
+    min-height: 0
+}
+
+.tgl .tgl-track {
+    position: relative;
+    flex-shrink: 0;
+    width: 44px;
+    height: 24px;
+    background: var(--bdr2);
+    border-radius: 999px;
+    transition: background var(--tr)
+}
+
+.tgl .tgl-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(0 0 0 / .25);
+    transition: transform var(--tr)
+}
+
+.tgl > input:checked + .tgl-track {
+    background: var(--acc)
+}
+
+.tgl > input:checked + .tgl-track::after {
+    transform: translateX(20px)
+}
+
+.tgl > input:focus-visible + .tgl-track {
+    box-shadow: 0 0 0 3px var(--accs)
+}
+
+.tgl.disabled,
+.tgl > input:disabled + .tgl-track {
+    cursor: not-allowed;
+    opacity: .55
+}
+
+.tgl-label {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 1px
+}
+
+.tgl-hint {
+    font-size: 11px;
+    color: var(--t3)
+}
+
+/* White accent → dark knob so it stays visible on the light track */
+:root[data-theme-accent='white'] .tgl > input:checked + .tgl-track::after {
+    background: var(--acc-contrast)
+}
+
+/* ----- Checkbox & Radio label wrappers -----
+   The control itself is styled by the global input[type] rules above. */
+.ckb,
+.rdo {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 9px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--t2);
+    line-height: 1.45
+}
+
+.ckb > input,
+.rdo > input {
+    margin-top: 1px
+}
+
+.ckb.disabled,
+.rdo.disabled {
+    cursor: not-allowed;
+    opacity: .6
+}
+
+.ckb-hint,
+.rdo-hint {
+    display: block;
+    font-size: 11px;
+    color: var(--t3);
+    margin-top: 1px
+}
+
+/* ----- File upload (drag & drop dropzone) ----- */
+.fup {
+    position: relative;
+    border: 1.5px dashed var(--bdr2);
+    border-radius: var(--r);
+    background: var(--bg);
+    padding: 30px 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--tr), background var(--tr)
+}
+
+.fup:hover,
+.fup.dragover {
+    border-color: var(--acc);
+    background: var(--accs)
+}
+
+.fup > input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer
+}
+
+.fup-ic {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accs);
+    color: var(--acc);
+    font-size: 20px;
+    transition: transform var(--tr)
+}
+
+.fup:hover .fup-ic {
+    transform: translateY(-2px)
+}
+
+.fup-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--t1);
+    margin-bottom: 4px
+}
+
+.fup-title span {
+    color: var(--acc)
+}
+
+.fup-hint {
+    font-size: 12px;
+    color: var(--t3)
+}
+
+.fup-files {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    text-align: left
+}
+
+.fup-files:empty {
+    margin: 0
+}
+
+.fup-file {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 11px;
+    border: 1px solid var(--bdr);
+    border-radius: var(--rs);
+    background: var(--card);
+    font-size: 12px;
+    color: var(--t2)
+}
+
+.fup-file > i {
+    color: var(--acc);
+    font-size: 14px;
+    flex-shrink: 0
+}
+
+.fup-file-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--t1);
+    font-weight: 500
+}
+
+.fup-file-size {
+    color: var(--t3);
+    flex-shrink: 0
+}
+
+.fup-file-remove {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1px solid var(--bdr);
+    background: transparent;
+    color: var(--t3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    transition: all var(--tr)
+}
+
+.fup-file-remove:hover {
+    border-color: var(--ros);
+    color: var(--ros)
+}
+
+.fup-current {
+    font-size: 11px;
+    color: var(--t3);
+    margin-top: 8px
+}
+
+.fup-current a {
+    color: var(--acc)
+}
+
+/* ----- Select2: multi-select (single-select styled earlier) ----- */
+.select2-container--default .select2-selection--multiple {
+    background: var(--bg);
+    border: 1px solid var(--bdr);
+    border-radius: var(--rs);
+    min-height: 40px;
+    padding: 2px 6px;
+    transition: border-color var(--tr)
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--multiple {
+    border-color: var(--acc);
+    box-shadow: 0 0 0 3px var(--accs)
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background: var(--accs);
+    border: none;
+    border-radius: 6px;
+    color: var(--acc);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 8px 3px 6px;
+    margin: 4px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: var(--acc);
+    border: none;
+    background: none;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    order: 2;
+    margin: 0
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    background: none;
+    color: var(--ros)
+}
+
+.select2-container--default .select2-selection--multiple .select2-search__field {
+    color: var(--t1);
+    font-family: var(--font-body);
+    font-size: 14px;
+    margin-top: 6px
+}
+
+.select2-container--default .select2-selection--multiple .select2-search__field::placeholder {
+    color: var(--t3)
+}
+
+.select2-container .select2-search--inline .select2-search__field {
+    margin-left: 4px
+}
+
 @media(max-width:768px) {
     .sb {
         transform: translateX(-100%)

@@ -40,6 +40,13 @@
             </a>
         </div>
         <div class="ns">
+            <div class="nst">UI Reference</div>
+            <a href="{{ route('admin.form-elements') }}"
+               class="ni {{ request()->routeIs('admin.form-elements') ? 'active' : '' }}">
+                <i class="fa-solid fa-wand-magic-sparkles nic"></i> Form Elements
+            </a>
+        </div>
+        <div class="ns">
             <div class="nst">System</div>
             <form method="POST" action="{{ route('admin.logout') }}" id="logout-form">
                 @csrf

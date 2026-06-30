@@ -48,6 +48,9 @@ Route::middleware('auth:admin')->group(function () {
     Route::resource('/institution-types', InstitutionTypeController::class)->except('show');
     Route::resource('/boards', BoardController::class)->except('show');
 
+    // UI reference → reusable form components showcase.
+    Route::view('/form-elements', 'admin.reference.form-elements')->name('form-elements');
+
     Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
 });
 

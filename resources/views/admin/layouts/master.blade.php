@@ -62,15 +62,20 @@
     window.initSelect2 = function(container) {
         container = container || document;
         $(container).find('select.fs').each(function() {
+            var $el = $(this);
             // Destroy existing instance before re-init (handles width refresh)
-            if ($(this).hasClass('select2-hidden-accessible')) {
-                $(this).select2('destroy');
+            if ($el.hasClass('select2-hidden-accessible')) {
+                $el.select2('destroy');
             }
-            $(this).select2({
-                minimumResultsForSearch: 8,
+            var isMultiple = $el.prop('multiple');
+            var noSearch = $el.data('search') === false || $el.data('search') === 'false';
+            $el.select2({
                 width: '100%',
-                placeholder: $(this).find('option[value=""]').text() || 'Select...',
-                allowClear: false
+                // Hide the search box when data-search="false", else show it past 8 options.
+                minimumResultsForSearch: noSearch ? Infinity : 8,
+                placeholder: $el.data('placeholder') || $el.find('option[value=""]').text() || 'Select...',
+                allowClear: !isMultiple && ($el.data('allow-clear') === true || $el.data('allow-clear') === 'true'),
+                closeOnSelect: !isMultiple
             });
         });
     };

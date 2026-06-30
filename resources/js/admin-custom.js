@@ -245,4 +245,68 @@ $(function(){
       $rows.eq(smActive < 0 ? 0 : smActive).trigger('click');
     }
   });
+
+  /* ============================================================
+     FILE UPLOAD DROPZONE (.fup — <x-form.file-upload>)
+     Drag & drop, click-to-browse, selected-file list with
+     per-file removal. Delegated, so it works on injected markup.
+     ============================================================ */
+  function fupFmtSize(b){
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1048576).toFixed(1) + ' MB';
+  }
+
+  function fupRender($fup){
+    var input = $fup.find('input[type="file"]')[0];
+    var $list = $fup.find('[data-fup-files]');
+    if (!input || !$list.length) return;
+    $list.empty();
+    Array.prototype.forEach.call(input.files, function(f){
+      $list.append(
+        '<li class="fup-file">' +
+          '<i class="fa-solid fa-file-lines"></i>' +
+          '<span class="fup-file-name">' + $('<div>').text(f.name).html() + '</span>' +
+          '<span class="fup-file-size">' + fupFmtSize(f.size) + '</span>' +
+          '<button type="button" class="fup-file-remove" title="Remove"><i class="fa-solid fa-xmark"></i></button>' +
+        '</li>'
+      );
+    });
+  }
+
+  $(document).on('dragover', '.fup', function(e){ e.preventDefault(); $(this).addClass('dragover'); });
+  $(document).on('dragleave', '.fup', function(e){ e.preventDefault(); $(this).removeClass('dragover'); });
+  $(document).on('drop', '.fup', function(e){
+    e.preventDefault();
+    $(this).removeClass('dragover');
+    var input = $(this).find('input[type="file"]')[0];
+    var dropped = e.originalEvent && e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files;
+    if (!input || !dropped || !dropped.length) return;
+    // Respect single-file inputs: only keep the first dropped file.
+    if (!input.multiple && dropped.length > 1){
+      var dt = new DataTransfer();
+      dt.items.add(dropped[0]);
+      input.files = dt.files;
+    } else {
+      input.files = dropped;
+    }
+    $(input).trigger('change');
+  });
+
+  $(document).on('change', '.fup input[type="file"]', function(){
+    fupRender($(this).closest('.fup'));
+  });
+
+  $(document).on('click', '.fup-file-remove', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    var $fup = $(this).closest('.fup');
+    var input = $fup.find('input[type="file"]')[0];
+    if (!input) return;
+    var idx = $(this).closest('.fup-file').index();
+    var dt = new DataTransfer();
+    Array.prototype.forEach.call(input.files, function(f, i){ if (i !== idx) dt.items.add(f); });
+    input.files = dt.files;
+    fupRender($fup);
+  });
 });
