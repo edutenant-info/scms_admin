@@ -154,14 +154,8 @@
         </div>
 
         <div style="display:flex;flex-wrap:wrap;gap:24px;margin-top:18px;padding-top:18px;border-top:1px solid var(--bdr);">
-            <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer;">
-                <span class="sw"><input type="checkbox" name="is_2fa_enabled" value="1" @checked(old('is_2fa_enabled', $organisation->is_2fa_enabled ?? false))><span class="sl"></span></span>
-                2FA Enabled
-            </label>
-            <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer;">
-                <span class="sw"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $organisation->is_active ?? true))><span class="sl"></span></span>
-                Active
-            </label>
+            <x-form.toggle name="is_2fa_enabled" label="2FA Enabled" :checked="$organisation->is_2fa_enabled ?? false" />
+            <x-form.toggle name="is_active" label="Active" :checked="$organisation->is_active ?? true" />
         </div>
     </div></div>
 </div>

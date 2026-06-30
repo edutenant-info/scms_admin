@@ -30,10 +30,7 @@
     </div>
 
     <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--bdr);">
-        <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer;">
-            <span class="sw"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $template->is_active ?? true))><span class="sl"></span></span>
-            Active
-        </label>
+        <x-form.toggle name="is_active" label="Active" :checked="$template->is_active ?? true" />
     </div>
 </div></div>
 
