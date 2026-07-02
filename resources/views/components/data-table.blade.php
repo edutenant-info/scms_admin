@@ -30,6 +30,7 @@
             'key'      => $c['key'] ?? '',
             'label'    => $c['label'] ?? \Illuminate\Support\Str::headline($c['key'] ?? ''),
             'sortable' => (bool) ($c['sortable'] ?? false),
+            'filter'   => (bool) ($c['filter'] ?? false),
             'type'     => $c['type'] ?? 'text',
             'sub'      => $c['sub'] ?? null,
             'avatar'   => $c['avatar'] ?? null,
@@ -54,7 +55,7 @@
         <div class="ch"><span class="ctit">{{ $title }}</span></div>
     @endif
 
-    {{-- ── Toolbar: per-page selector (left) · search + download (right) ── --}}
+    {{-- ── Toolbar: per-page selector (left) · filters + search + download (right) ── --}}
     <div class="dt-tools">
         <label class="dt-len">
             <span>Show</span>
@@ -67,10 +68,43 @@
         </label>
 
         <div class="dt-actions">
+            {{-- Custom per-column filters (columns flagged with 'filter' => true) --}}
+            <template x-for="col in filterCols" :key="col.key">
+                <select class="dt-len-sel dt-filter-sel" x-model="filters[col.key]" @change="page = 1">
+                    <option value="" x-text="'All ' + col.label"></option>
+                    <template x-for="opt in filterOptions(col)" :key="opt">
+                        <option :value="opt" x-text="opt"></option>
+                    </template>
+                </select>
+            </template>
+            <button type="button" class="btn bo bs dt-filter-clear"
+                    x-show="hasActiveFilters" x-cloak @click="clearFilters()">
+                <i class="fa-solid fa-filter-circle-xmark"></i> Clear
+            </button>
+
             @if($searchable)
-                <div class="msrc dt-search">
+                {{-- Autocomplete search: type-ahead suggestions from the dataset --}}
+                <div class="msrc dt-search" @click.outside="showSuggest = false">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" x-model="search" placeholder="{{ $searchPlaceholder }}">
+                    <input type="text" x-model="search" autocomplete="off"
+                           placeholder="{{ $searchPlaceholder }}"
+                           @focus="showSuggest = true"
+                           @input="showSuggest = true; activeSuggest = -1"
+                           @keydown.down.prevent="moveSuggest(1)"
+                           @keydown.up.prevent="moveSuggest(-1)"
+                           @keydown.enter.prevent="chooseSuggest()"
+                           @keydown.escape="showSuggest = false">
+                    <div class="dt-suggest" x-show="showSuggest && suggestions.length" x-cloak>
+                        <template x-for="(s, i) in suggestions" :key="s">
+                            <div class="dt-suggest-item"
+                                 :class="i === activeSuggest ? 'active' : ''"
+                                 @mousedown.prevent="applySuggest(s)"
+                                 @mouseenter="activeSuggest = i">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <span x-html="highlight(s)"></span>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             @endif
             @if($downloadable)
@@ -187,22 +221,102 @@
             sortDir: 'asc',
             perPage: config.perPage || 10,
             page:    1,
+            filters: {},        // { columnKey: selectedValue } for custom filters
+            showSuggest: false, // autocomplete dropdown visibility
+            activeSuggest: -1,  // keyboard-highlighted suggestion index
 
             init() {
+                // Seed a blank filter slot for every filterable column.
+                this.columns.forEach(c => { if (c.filter) this.filters[c.key] = ''; });
                 // Any change that shrinks/rearranges the result set returns to page 1.
                 this.$watch('search',  () => this.page = 1);
                 this.$watch('perPage', () => this.page = 1);
             },
 
+            // ── Custom filters ──────────────────────────────────────────
+            get filterCols() { return this.columns.filter(c => c.filter); },
+            get hasActiveFilters() {
+                return this.filterCols.some(c => this.filters[c.key]);
+            },
+            // Distinct, sorted values for a column's filter dropdown.
+            filterOptions(col) {
+                const set = new Set();
+                this.rows.forEach(r => {
+                    const v = r[col.key];
+                    if (v !== undefined && v !== null && v !== '') set.add(String(v));
+                });
+                return [...set].sort((a, b) => a.localeCompare(b));
+            },
+            clearFilters() {
+                this.filterCols.forEach(c => this.filters[c.key] = '');
+                this.page = 1;
+            },
+
             // ── Derived data ────────────────────────────────────────────
             get filtered() {
+                let rows = this.rows;
+                // Exact-match custom column filters.
+                const active = this.filterCols.filter(c => this.filters[c.key]);
+                if (active.length) {
+                    rows = rows.filter(r => active.every(c => String(r[c.key] ?? '') === this.filters[c.key]));
+                }
+                // Free-text search across all columns (+ user subtitles).
                 const q = this.search.trim().toLowerCase();
-                if (!q) return this.rows;
-                return this.rows.filter(r => this.columns.some(c => {
-                    let v = String(r[c.key] ?? '');
-                    if (c.sub) v += ' ' + String(r[c.sub] ?? '');
-                    return v.toLowerCase().includes(q);
-                }));
+                if (q) {
+                    rows = rows.filter(r => this.columns.some(c => {
+                        let v = String(r[c.key] ?? '');
+                        if (c.sub) v += ' ' + String(r[c.sub] ?? '');
+                        return v.toLowerCase().includes(q);
+                    }));
+                }
+                return rows;
+            },
+
+            // ── Autocomplete suggestions ────────────────────────────────
+            get suggestions() {
+                const q = this.search.trim().toLowerCase();
+                if (!q) return [];
+                const seen = new Set(), out = [];
+                for (const r of this.rows) {
+                    for (const c of this.columns) {
+                        if (c.type === 'action') continue;
+                        const val = String(r[c.key] ?? '');
+                        const key = val.toLowerCase();
+                        if (val && key.includes(q) && !seen.has(key)) {
+                            seen.add(key);
+                            out.push(val);
+                            if (out.length >= 8) return out;
+                        }
+                    }
+                }
+                return out;
+            },
+            moveSuggest(dir) {
+                const n = this.suggestions.length;
+                if (!n) return;
+                this.showSuggest = true;
+                this.activeSuggest = (this.activeSuggest + dir + n) % n;
+            },
+            chooseSuggest() {
+                const s = this.suggestions[this.activeSuggest];
+                if (s !== undefined) this.applySuggest(s);
+                else this.showSuggest = false;
+            },
+            applySuggest(v) {
+                this.search = v;
+                this.showSuggest = false;
+                this.activeSuggest = -1;
+            },
+            escapeHtml(s) {
+                return String(s).replace(/[&<>"']/g, c =>
+                    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            },
+            highlight(s) {
+                const esc = this.escapeHtml(s);
+                const q = this.search.trim();
+                if (!q) return esc;
+                const eq = this.escapeHtml(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                return esc.replace(new RegExp('(' + eq + ')', 'ig'), '<strong>$1</strong>');
             },
             get sorted() {
                 if (!this.sortKey) return this.filtered;

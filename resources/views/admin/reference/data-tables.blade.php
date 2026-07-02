@@ -43,8 +43,8 @@
             <x-data-table
                 :columns="[
                     ['key' => 'name',     'label' => 'User',       'sortable' => true, 'type' => 'user', 'sub' => 'email', 'color' => 'color'],
-                    ['key' => 'position', 'label' => 'Position',   'sortable' => true],
-                    ['key' => 'office',   'label' => 'Office',     'sortable' => true],
+                    ['key' => 'position', 'label' => 'Position',   'sortable' => true, 'filter' => true],
+                    ['key' => 'office',   'label' => 'Office',     'sortable' => true, 'filter' => true],
                     ['key' => 'age',      'label' => 'Age',        'sortable' => true],
                     ['key' => 'start',    'label' => 'Start date', 'sortable' => true],
                     ['key' => 'salary',   'label' => 'Salary',     'sortable' => true],
@@ -55,6 +55,7 @@
             />
             <p style="font-size:11px;color:var(--t3);margin-top:10px;">
                 <code>&lt;x-data-table :columns="$columns" :rows="$rows" /&gt;</code>
+                — flag a column with <code>'filter' =&gt; true</code> for a custom dropdown filter; the search box is an autocomplete type-ahead.
             </p>
         </div>
 
@@ -66,8 +67,8 @@
                     ['key' => 'name',     'label' => 'User',     'sortable' => true, 'type' => 'user', 'sub' => 'email', 'color' => 'color'],
                     ['key' => 'position', 'label' => 'Position', 'sortable' => true],
                     ['key' => 'salary',   'label' => 'Salary',   'sortable' => true],
-                    ['key' => 'office',   'label' => 'Office',   'sortable' => true],
-                    ['key' => 'status',   'label' => 'Status',   'sortable' => true, 'type' => 'badge', 'badges' => $statusBadges],
+                    ['key' => 'office',   'label' => 'Office',   'sortable' => true, 'filter' => true],
+                    ['key' => 'status',   'label' => 'Status',   'sortable' => true, 'type' => 'badge', 'badges' => $statusBadges, 'filter' => true],
                     ['key' => 'action',   'label' => 'Action',   'type' => 'action', 'align' => 'right'],
                 ]"
                 :rows="$people"
