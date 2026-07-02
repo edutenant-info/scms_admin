@@ -310,3 +310,86 @@ $(function(){
     fupRender($fup);
   });
 });
+
+/* ============================================================
+   GLOBAL LOADER + FORM-SUBMIT BUTTON LOADER
+   ------------------------------------------------------------
+   • Global loader: a full-viewport overlay shown on real page
+     navigations (link clicks) and form submissions, hidden once
+     the next page renders (and on bfcache back/forward restore).
+   • Submit loader: the submitting form's submit button is
+     disabled and shows an inline spinner to prevent double
+     submits and signal progress.
+   These are wired globally, so every admin section — organisations,
+   institutions, login/dashboard templates, institution-types,
+   boards, etc. — gets the behaviour automatically.
+   ============================================================ */
+$(function () {
+  var $loader = $('#global-loader');
+
+  function showLoader() {
+    $loader.addClass('active').attr('aria-hidden', 'false');
+  }
+  function hideLoader() {
+    $loader.removeClass('active').attr('aria-hidden', 'true');
+  }
+
+  // Put a submit button into its loading state (spinner + disabled).
+  function startButtonLoading($btn) {
+    if (!$btn.length || $btn.data('loading')) return;
+    $btn.data('loading', true);
+    $btn.data('original-html', $btn.html());
+    var isIconOnly = $btn.text().trim() === '';
+    var label = $btn.data('loading-text') || 'Please wait…';
+    $btn.html(isIconOnly
+      ? '<span class="btn-spinner"></span>'
+      : '<span class="btn-spinner"></span> ' + label);
+    $btn.addClass('btn-loading').prop('disabled', true);
+  }
+
+  // Restore any buttons left in a loading state (used on bfcache restore).
+  function resetLoadingButtons() {
+    $('.btn-loading').each(function () {
+      var $btn = $(this);
+      if ($btn.data('original-html') !== undefined) {
+        $btn.html($btn.data('original-html'));
+      }
+      $btn.removeClass('btn-loading').prop('disabled', false)
+          .removeData('loading').removeData('original-html');
+    });
+  }
+
+  // Hide loader on initial paint and whenever the page is restored from
+  // the back/forward (bfcache) cache — otherwise it'd stay stuck visible.
+  $(window).on('pageshow', function () {
+    hideLoader();
+    resetLoadingButtons();
+  });
+
+  // ----- Form submissions -----
+  // Runs during the bubbling phase (delegated on document), so any
+  // page-level handler that cancels the submit — HTML5 validation
+  // blocks the event entirely, and a delete-confirm that returns false
+  // sets defaultPrevented — is respected and we do nothing.
+  $(document).on('submit', 'form', function (e) {
+    if (e.isDefaultPrevented()) return;
+    var $form = $(this);
+    var $btn = $form.find(
+      'button[type="submit"], input[type="submit"], button:not([type])'
+    ).first();
+    startButtonLoading($btn);
+    showLoader();
+  });
+
+  // ----- Link navigations -----
+  $(document).on('click', 'a[href]', function (e) {
+    if (e.isDefaultPrevented()) return;                       // SPA / handled click
+    if (e.which > 1 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // new tab / modified
+    var $a = $(this);
+    var href = $a.attr('href') || '';
+    if (href === '' || href.charAt(0) === '#') return;        // in-page anchor
+    if (/^(javascript:|mailto:|tel:)/i.test(href)) return;    // non-navigations
+    if ($a.attr('target') === '_blank' || $a.is('[download]')) return;
+    showLoader();
+  });
+});

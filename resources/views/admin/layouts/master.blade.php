@@ -29,6 +29,12 @@
 </head>
 
 <body>
+    {{-- Global page loader — shown during navigations & form submissions. --}}
+    <div class="global-loader" id="global-loader" role="status" aria-live="polite" aria-hidden="true">
+        <div class="gl-spinner"></div>
+        <div class="gl-text">Loading…</div>
+    </div>
+
     <div id="dashboard-page" style="display: block;">
         <div class="al">
             @include('admin.partials.sidebar')

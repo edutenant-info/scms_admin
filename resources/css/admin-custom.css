@@ -1599,6 +1599,138 @@ tr:hover td {
     color: var(--cyn)
 }
 
+/* ── DATA TABLE (reusable <x-data-table>) ───────────────────────────── */
+.dt-tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--bdr);
+    flex-wrap: wrap
+}
+
+.dt-len {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--t3)
+}
+
+.dt-len-sel {
+    padding: 6px 26px 6px 10px;
+    background: var(--bg);
+    border: 1px solid var(--bdr);
+    border-radius: var(--rs);
+    color: var(--t1);
+    font-family: var(--font-body);
+    font-size: 12px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748B' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center
+}
+
+.dt-len-sel:focus {
+    border-color: var(--acc)
+}
+
+.dt-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap
+}
+
+.dt-search {
+    width: 240px
+}
+
+/* Sortable header */
+.dt-th {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px
+}
+
+.dt-sortable {
+    cursor: pointer;
+    user-select: none
+}
+
+.dt-sortable:hover {
+    color: var(--t1)
+}
+
+.dt-sort {
+    display: inline-flex;
+    font-size: 10px;
+    color: var(--t3)
+}
+
+.dt-sort .fa-sort-up,
+.dt-sort .fa-sort-down {
+    color: var(--acc)
+}
+
+/* Footer: counter + pagination */
+.dt-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--bdr);
+    flex-wrap: wrap
+}
+
+.dt-count {
+    font-size: 12px;
+    color: var(--t3)
+}
+
+.dt-pag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px
+}
+
+.dt-pg {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--bdr);
+    border-radius: var(--rs);
+    color: var(--t2);
+    font-family: var(--font-body);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all var(--tr)
+}
+
+.dt-pg:hover:not(:disabled):not(.active) {
+    border-color: var(--acc);
+    color: var(--acc)
+}
+
+.dt-pg.active {
+    background: var(--acc);
+    border-color: var(--acc);
+    color: var(--acc-contrast)
+}
+
+.dt-pg:disabled {
+    opacity: .45;
+    cursor: not-allowed
+}
+
 /* TENANT CARDS */
 .tg {
     display: grid;
@@ -3770,4 +3902,74 @@ span.flatpickr-weekday {
         width: 100%;
         right: -100%
     }
+}
+
+/* ============================================================
+   GLOBAL PAGE LOADER — full-viewport overlay shown during
+   navigations and form submissions across the whole admin.
+   ============================================================ */
+.global-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: var(--modal-overlay);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--tr), visibility var(--tr);
+}
+
+.global-loader.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+}
+
+.global-loader .gl-spinner {
+    width: 46px;
+    height: 46px;
+    border: 4px solid var(--accs);
+    border-top-color: var(--acc);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+}
+
+.global-loader .gl-text {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .2px;
+    color: var(--t1);
+}
+
+/* ============================================================
+   FORM SUBMIT BUTTON LOADER — spinner + disabled state applied
+   to a form's submit button while the request is in flight.
+   ============================================================ */
+.btn:disabled,
+.bi:disabled,
+.btn.btn-loading,
+.bi.btn-loading {
+    opacity: .75;
+    cursor: progress;
+    pointer-events: none;
+}
+
+.btn-spinner {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+    vertical-align: -2px;
+    flex: none;
 }

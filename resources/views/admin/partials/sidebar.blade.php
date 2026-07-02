@@ -45,6 +45,10 @@
                class="ni {{ request()->routeIs('admin.form-elements') ? 'active' : '' }}">
                 <i class="fa-solid fa-wand-magic-sparkles nic"></i> Form Elements
             </a>
+            <a href="{{ route('admin.data-tables') }}"
+               class="ni {{ request()->routeIs('admin.data-tables') ? 'active' : '' }}">
+                <i class="fa-solid fa-table-list nic"></i> Data Tables
+            </a>
         </div>
         <div class="ns">
             <div class="nst">System</div>

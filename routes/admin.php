@@ -50,6 +50,7 @@ Route::middleware('auth:admin')->group(function () {
 
     // UI reference → reusable form components showcase.
     Route::view('/form-elements', 'admin.reference.form-elements')->name('form-elements');
+    Route::view('/data-tables', 'admin.reference.data-tables')->name('data-tables');
 
     Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
 });
