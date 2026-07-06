@@ -39,6 +39,7 @@
             $academicActive = request()->routeIs(
                 'admin.boards.*',
                 'admin.subjects.*',
+                'admin.electives.*',
                 'admin.streams.*',
                 'admin.combinations.*',
                 'admin.standards.*',
@@ -58,6 +59,10 @@
                 'admin.master-categories.*',
                 'admin.general-categories.*',
             );
+            $mappingsActive = request()->routeIs(
+                'admin.institution-academic-years.*',
+                'admin.institution-fee-types.*',
+            );
         @endphp
         <div class="ns">
             <div class="nst">Master</div>
@@ -73,6 +78,10 @@
                 <a href="{{ route('admin.subjects.index') }}"
                    class="nch {{ request()->routeIs('admin.subjects.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-book-open nic"></i> Subjects
+                </a>
+                <a href="{{ route('admin.electives.index') }}"
+                   class="nch {{ request()->routeIs('admin.electives.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-book-bookmark nic"></i> Electives
                 </a>
                 <a href="{{ route('admin.streams.index') }}"
                    class="nch {{ request()->routeIs('admin.streams.*') ? 'active' : '' }}">
@@ -141,6 +150,20 @@
                 <a href="{{ route('admin.general-categories.index') }}"
                    class="nch {{ request()->routeIs('admin.general-categories.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-tags nic"></i> General Category
+                </a>
+            </div>
+            <div class="ni hc {{ $mappingsActive ? 'active' : '' }}" data-toggle="mp-mappings">
+                <i class="fa-solid fa-diagram-project nic"></i> Mappings
+                <i class="fa-solid fa-chevron-right ntog {{ $mappingsActive ? 'open' : '' }}"></i>
+            </div>
+            <div class="nc {{ $mappingsActive ? 'open' : '' }}" id="mp-mappings">
+                <a href="{{ route('admin.institution-academic-years.index') }}"
+                   class="nch {{ request()->routeIs('admin.institution-academic-years.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-calendar-check nic"></i> Academic Years
+                </a>
+                <a href="{{ route('admin.institution-fee-types.index') }}"
+                   class="nch {{ request()->routeIs('admin.institution-fee-types.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-money-check-dollar nic"></i> Fee Types
                 </a>
             </div>
         </div>

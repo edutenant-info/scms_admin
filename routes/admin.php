@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\Auth\AdminAuthController;
 use App\Http\Controllers\Admin\Masters\Academic\AcademicYearController;
 use App\Http\Controllers\Admin\Masters\Academic\CombinationController;
+use App\Http\Controllers\Admin\Masters\Academic\ElectiveController;
 use App\Http\Controllers\Admin\Masters\Academic\SectionController;
 use App\Http\Controllers\Admin\Masters\Academic\SemesterController;
 use App\Http\Controllers\Admin\Masters\Academic\StandardController;
@@ -16,6 +17,8 @@ use App\Http\Controllers\Admin\Masters\Demographic\ReligionController;
 use App\Http\Controllers\Admin\Masters\Fees\FeeTypeController;
 use App\Http\Controllers\Admin\Masters\Fees\GeneralCategoryController;
 use App\Http\Controllers\Admin\Masters\Fees\MasterCategoryController;
+use App\Http\Controllers\Admin\Masters\Mappings\InstitutionAcademicYearController;
+use App\Http\Controllers\Admin\Masters\Mappings\InstitutionFeeTypeController;
 use App\Http\Controllers\Admin\Modules\Institution\InstitutionController;
 use App\Http\Controllers\Admin\Modules\Organisation\OrganisationController;
 use App\Http\Controllers\Admin\Settings\BoardController;
@@ -65,6 +68,7 @@ Route::middleware('auth:admin')->group(function () {
 
     // Master's → Academic lookups (CRUD, mirrors the Boards pattern).
     Route::resource('/subjects', SubjectController::class)->except('show');
+    Route::resource('/electives', ElectiveController::class)->except('show');
     Route::resource('/streams', StreamController::class)->except('show');
     Route::resource('/combinations', CombinationController::class)->except('show');
     Route::resource('/standards', StandardController::class)->except('show');
@@ -83,6 +87,10 @@ Route::middleware('auth:admin')->group(function () {
     Route::resource('/fee-types', FeeTypeController::class)->except('show');
     Route::resource('/master-categories', MasterCategoryController::class)->except('show');
     Route::resource('/general-categories', GeneralCategoryController::class)->except('show');
+
+    // Master's → Mappings (institution-scoped lookup assignments).
+    Route::resource('/institution-academic-years', InstitutionAcademicYearController::class)->except('show');
+    Route::resource('/institution-fee-types', InstitutionFeeTypeController::class)->except('show');
 
     // UI reference → reusable form components showcase.
     Route::view('/form-elements', 'admin.reference.form-elements')->name('form-elements');

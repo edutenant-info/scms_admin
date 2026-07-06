@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -76,5 +77,19 @@ class Institution extends Model
     public function institutionAddress(): HasOne
     {
         return $this->hasOne(InstitutionAddress::class);
+    }
+
+    public function academicYears(): BelongsToMany
+    {
+        return $this->belongsToMany(AcademicYear::class, 'institution_academic_years')
+            ->withPivot(['id', 'is_active'])
+            ->withTimestamps();
+    }
+
+    public function feeTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(FeeType::class, 'institution_fee_types')
+            ->withPivot(['id', 'is_active'])
+            ->withTimestamps();
     }
 }
